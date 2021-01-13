@@ -14,6 +14,7 @@
 
 #include "log_event.h"
 
+#include "logging.h"
 #include "byte_order.h"
 #include "mysql_constants.h"
 

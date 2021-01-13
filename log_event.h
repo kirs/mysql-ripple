@@ -24,6 +24,7 @@
 
 #include "buffer.h"
 #include "gtid.h"
+#include "logging.h"
 
 namespace mysql_ripple {
 
