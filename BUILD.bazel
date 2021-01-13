@@ -650,6 +650,7 @@ cc_library(
         ":base",
         ":file_position",
         ":gtid",
+        ":byte_order",
         ":log_event",
         ":monitoring",
         ":mysql_constants",

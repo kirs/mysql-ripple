@@ -17,6 +17,7 @@
 #include "logging.h"
 #include "monitoring.h"
 #include "mysql_constants.h"
+#include "byte_order.h"
 
 namespace mysql_ripple {
 
