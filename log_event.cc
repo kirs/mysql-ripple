@@ -120,6 +120,8 @@ std::string RawLogEventData::ToInfoString() const {
       return ParseToInfoString<StartEncryptionEvent>(*this);
     case constants::ET_GTID_MYSQL:
       return ParseToInfoString<GTIDMySQLEvent>(*this);
+    case constants::ET_TABLE_MAP:
+      return ParseToInfoString<TableMapEvent>(*this);
   }
   return "";
 }
@@ -546,5 +548,53 @@ bool HeartbeatEvent::ParseFromBuffer(const uint8_t *ptr, int len) {
 std::string HeartbeatEvent::ToInfoString() const {
   return "filename=" + filename;
 }
+
+int TableMapEvent::GetEventType() const {
+  return constants::ET_TABLE_MAP;
+}
+
+// int TableMapEvent::PackLength() const {
+//   return 2 + kServerVersionStringLen + 4 + 1 +
+//     event_type_header_lengths.size() + 1;
+// }
+
+bool TableMapEvent::ParseFromBuffer(const uint8_t *buffer, int len) {
+  // the format descriptor event consists of some fixed size parts
+  // and then a variable section and finally the checksum TRUE/FALSE in the end.
+  // we don't (currently) care about the variable section.
+  // const int fixed_len = 2 + kServerVersionStringLen + 4 + 1;
+  // if (len < fixed_len) {
+  //   return false;
+  // }
+
+  table_id = byte_order::load6(buffer);
+
+  uint8_t schema_name_len = byte_order::load1(buffer + 8);
+  schema_name.assign(reinterpret_cast<const char*>(buffer + 8), schema_name_len);
+
+  uint8_t table_name_len = byte_order::load1(buffer + 8 + schema_name_len);
+  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + schema_name_len), table_name_len);
+
+  // const char *ptr = reinterpret_cast<const char*>(buffer + 2);
+  // size_t version_len = strnlen(ptr, kServerVersionStringLen);
+  // server_version = std::string(ptr, version_len);
+  // create_timestamp = byte_order::load4(buffer + kServerVersionStringLen + 2);
+  // event_header_length = byte_order::load1(buffer + kServerVersionStringLen +
+  //                                         2 + 4);
+  // for (uint offset = kServerVersionStringLen + 2 + 4 + 1; offset < len - 1;
+  //      offset++) {
+  //   event_type_header_lengths.push_back(byte_order::load1(buffer + offset));
+  // }
+  // checksum = byte_order::load1(buffer + len - 1);
+  return true;
+}
+
+std::string TableMapEvent::ToInfoString() const {
+    return
+      "table id: " + std::to_string(table_id) +
+      ", schema name: " + schema_name +
+      ", table name: " + table_name;
+}
+
 
 }  // namespace mysql_ripple

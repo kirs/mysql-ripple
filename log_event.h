@@ -257,6 +257,14 @@ struct HeartbeatEvent : public EventBase {
   bool SerializeToBuffer(uint8_t *buffer, int len) const override;
 };
 
+struct TableMapEvent : public EventBase {
+  uint64_t table_id;
+  std::string schema_name;
+  std::string table_name;
+
+  int GetEventType() const override;
+}
+
 }  // namespace mysql_ripple
 
 #endif  // MYSQL_RIPPLE_LOG_EVENT_H

@@ -1,6 +1,10 @@
+# local
+
+export $(grep -v '^#' .env | xargs)
+
 # VM setup
 
-# ripple only works on this
+# ripple can build on debian 9 but not debian 10
 
 IMAGE=debian-9-stretch-v20201216
 ZONE=europe-north1-a
@@ -12,7 +16,7 @@ gcloud beta compute --project $PROJECT instances create $INSTANCE --zone=$ZONE -
 
 gcloud beta compute --project $PROJECT ssh $INSTANCE
 
-# installing mysql
+# docker
 
 sudo apt-get update
 
@@ -50,6 +54,8 @@ bazel build :all
 bazel test :all
 
 docker run --network=host --name mysql-m1 -e MYSQL_ROOT_PASSWORD=shopify -e MYSQL_DATABASE=shopify -d mysql:5.7
+
+# run local mysql
 
 docker run -d --network=host --name mysql-m1-percona -e MYSQL_ALLOW_EMPTY_PASSWORD=yes percona:5.7-jessie \
  --server-id=1 \

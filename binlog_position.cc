@@ -163,6 +163,17 @@ int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
       group_state = END_OF_GROUP;
       break;
     }
+    case constants::ET_TABLE_MAP: {
+      TableMapEvent ev;
+      if (!ev.ParseFromRawLogEventData(event)) {
+        LOG(ERROR) << "Failed to parse QueryEvent";
+        monitoring::rippled_binlog_error->Increment(
+          monitoring::ERROR_PARSE_QUERY);
+        return -1;
+      }
+      group_state = END_OF_GROUP;
+      break;
+    }
     case constants::ET_QUERY: {
       QueryEvent ev;
       if (!ev.ParseFromRawLogEventData(event)) {

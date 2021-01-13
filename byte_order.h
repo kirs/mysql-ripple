@@ -95,6 +95,19 @@ static inline uint32_t load4(const void *ptr) {
       (((uint32_t)tmp[3]) << 24);
 }
 
+static inline uint64_t load6(const void *ptr) {
+  const uint8_t *tmp = reinterpret_cast<const uint8_t*>(ptr);
+  return
+      (((uint64_t)tmp[0]) << 0) +
+      (((uint64_t)tmp[1]) << 8) +
+      (((uint64_t)tmp[2]) << 16) +
+      (((uint64_t)tmp[3]) << 24) +
+      (((uint64_t)tmp[4]) << 32) +
+      (((uint64_t)tmp[5]) << 40);
+      // (((uint64_t)tmp[6]) << 48) +
+      // (((uint64_t)tmp[7]) << 56);
+}
+
 static inline uint64_t load8(const void *ptr) {
   const uint8_t *tmp = reinterpret_cast<const uint8_t*>(ptr);
   return
