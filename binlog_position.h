@@ -22,8 +22,20 @@
 #include "file_position.h"
 #include "gtid.h"
 #include "log_event.h"
+#include "byte_order.h"
 
 namespace mysql_ripple {
+
+// captured from TABLE_MAP_EVENT
+static const uint64_t ORDERS_TABLE_ID = 114;
+
+struct RowsEvent {
+  uint64_t table_id;
+  uint64_t pk;
+  uint64_t shop_id;
+
+  bool ParseFromRawLogEventData(const RawLogEventData& event);
+};
 
 // This class represents a complete binlog position.
 struct BinlogPosition {

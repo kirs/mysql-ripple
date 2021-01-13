@@ -17,8 +17,59 @@
 #include "logging.h"
 #include "monitoring.h"
 #include "mysql_constants.h"
+#include "byte_order.h"
 
 namespace mysql_ripple {
+
+void parseTableMapEvent(const uint8_t *buffer, int len) {
+  // https://dev.mysql.com/doc/internals/en/table-map-event.html
+  // 1              schema name length
+  // string         schema name
+  // 1              [00]
+  // 1              table name length
+  // string         table name
+
+  std::string schema_name;
+  std::string table_name;
+
+  uint64_t table_id = byte_order::load6(buffer);
+
+  uint8_t schema_name_len = byte_order::load1(buffer + 8);
+  schema_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1), schema_name_len);
+
+  uint8_t table_name_len = byte_order::load1(buffer + 8 + 1 + schema_name_len + 1);
+  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1 + schema_name_len + 2), table_name_len);
+
+  if(schema_name.compare("mysql") != 0) {
+    LOG(INFO) << "TABLE_MAP_EVENT; " << schema_name << "." << table_name
+            << " table_id=" << std::to_string(table_id);
+  }
+}
+
+bool RowsEvent::ParseFromRawLogEventData(const RawLogEventData& event) {
+  const uint8_t *buffer = event.event_data;
+
+  uint64_t table_id = byte_order::load6(buffer);
+  if(table_id != ORDERS_TABLE_ID) return false;
+
+  uint16_t flags = byte_order::load2(buffer + 6);
+
+  // col num is length encoded int [1], but we are operating with small (< 255) column count, so it's fine to read it as it is
+  // [1]: https://dev.mysql.com/doc/internals/en/describing-packets.html#type-lenenc_int
+  uint8_t col_num = byte_order::load8(buffer + 6 + 2 + 2);
+
+  if(col_num > 0) {
+    // assuming promary key is bigint and is the first column
+    pk = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
+    // assuming shop_id is bigint and is the 2nd column
+    shop_id = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2 + 8);
+
+    fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d, pk=%d shop_id=%d\n", table_id, flags, col_num, pk, shop_id);
+    return true;
+  }
+
+  return false;
+}
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
   next_master_position.offset = event.header.nextpos;
@@ -161,6 +212,16 @@ int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
         return -1;
       }
       group_state = END_OF_GROUP;
+      break;
+    }
+    case constants::ET_TABLE_MAP: {
+      parseTableMapEvent(event.event_data, event.event_data_length);
+      break;
+    }
+    // TODO: handle UPDATE_ROWS and DELETE_ROWS as well
+    case constants::ET_WRITE_ROWS_V2: {
+      RowsEvent ev;
+      ev.ParseFromRawLogEventData(event);
       break;
     }
     case constants::ET_QUERY: {
