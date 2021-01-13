@@ -214,8 +214,8 @@ int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
       //     monitoring::ERROR_PARSE_QUERY);
       //   return -1;
       // }
-      group_state = END_OF_GROUP;
-      break;
+      // group_state = END_OF_GROUP;
+      // break;
     }
     case constants::ET_QUERY: {
       QueryEvent ev;
