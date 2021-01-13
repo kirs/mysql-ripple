@@ -23,7 +23,6 @@ namespace mysql_ripple {
 
 void parseTableMapEvent(const uint8_t *buffer, int len) {
   // https://dev.mysql.com/doc/internals/en/table-map-event.html
-
   uint64_t table_id;
   std::string schema_name;
   std::string table_name;
@@ -46,22 +45,22 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
     LOG(INFO) << "TABLE_MAP_EVENT; " << schema_name << "." << table_name
             << " table_id=" << std::to_string(table_id);
   }
+}
+
+void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
+  // TODO: branch on type_code
+
+  uint64_t table_id = byte_order::load6(buffer);
 
 
-  // TODO: printf!
 
-  // const char *ptr = reinterpret_cast<const char*>(buffer + 2);
-  // size_t version_len = strnlen(ptr, kServerVersionStringLen);
-  // server_version = std::string(ptr, version_len);
-  // create_timestamp = byte_order::load4(buffer + kServerVersionStringLen + 2);
-  // event_header_length = byte_order::load1(buffer + kServerVersionStringLen +
-  //                                         2 + 4);
-  // for (uint offset = kServerVersionStringLen + 2 + 4 + 1; offset < len - 1;
-  //      offset++) {
-  //   event_type_header_lengths.push_back(byte_order::load1(buffer + offset));
-  // }
-  // checksum = byte_order::load1(buffer + len - 1);
-  // return true;
+  // buffer + 6 = flags
+  // buffer + 6 + 2 = extra-data-length
+
+  // lenenc number of columns
+  uint8_t col_num = byte_order::load1(buffer + 6 + 2 + 2 + 1);
+
+  LOG(INFO) << "ROWS_EVENT; " << "table_id=" << std::to_string(table_id) << " columns=" << std::to_string(col_num);
 }
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
@@ -209,14 +208,11 @@ int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
     }
     case constants::ET_TABLE_MAP: {
       parseTableMapEvent(event.event_data, event.event_data_length);
-      // TableMapEvent ev;
-      // if (!ev.ParseFromRawLogEventData(event)) {
-      //   LOG(ERROR) << "Failed to parse QueryEvent";
-      //   monitoring::rippled_binlog_error->Increment(
-      //     monitoring::ERROR_PARSE_QUERY);
-      //   return -1;
-      // }
-      // group_state = END_OF_GROUP;
+      break;
+    }
+    // TODO: need to handle UPDATE_ROWS and DELETE_ROWS as well
+    case constants::ET_WRITE_ROWS_V2: {
+      parseRowsEvent(constants::ET_WRITE_ROWS_V2, event.event_data, event.event_data_length);
       break;
     }
     case constants::ET_QUERY: {
