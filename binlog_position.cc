@@ -49,9 +49,24 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
 
 void printHex(const uint8_t *buffer, int len) {
     for(size_t i = 0; i < len; ++i)
-    fprintf(stdout, "%02X%s", buffer[i],
+    fprintf(stdout, "0x%02X%s", buffer[i],
              ( i + 1 ) % 16 == 0 ? "\r\n" : " " );
 }
+
+// 00 00 01 00 00 00
+// 6F 00
+// 00 00 00 00 01 00 02 00 05 FF E0 1B 07 00
+// 00 00 00 00 00 10 0E 00 00 01 04 57 45 53 54 E0
+// 1B 07 00 00 01 00 00 00 00 00 00 00 00 03 57 45
+// I0113 20:16:38.843719  6927 binlog_position.cc:68] ROWS_EVENT; extra_len=2
+// I0113 20:16:38.843729  6927 binlog_position.cc:75] ROWS_EVENT; table_id=111 columns=224
+
+// 00 00 00 00 00 6D
+// 00 00 //flags
+// 00 00 // extra-data-length
+// 00 01 00 02 00 02 FF FE 0B 00 00
+// I0113 20:16:38.844470  6927 binlog_position.cc:68] ROWS_EVENT; extra_len=2
+// I0113 20:16:38.844476  6927 binlog_position.cc:75] ROWS_EVENT; table_id=109 columns=254
 
 void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // TODO: branch on type_code
@@ -65,7 +80,7 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // buffer + 6 + 2 = extra-data-length
 
   uint16_t extra_len = byte_order::load2(buffer + 6 + 2);
-  LOG(INFO) << "ROWS_EVENT; extra_len=" << std::to_string(extra_len);
+  LOG(INFO) << "ROWS_EVENT; extra_len=" << std::to_string(extra_len) << " byte1: " << buffer + 6 + 2 << " byte2: " << buffer + 6 + 2 + 1;
 
   // lenenc number of columns
   uint8_t col_num = byte_order::load1(buffer + 6 + 2 + 2 + extra_len);
