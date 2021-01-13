@@ -263,7 +263,7 @@ struct TableMapEvent : public EventBase {
   std::string table_name;
 
   int GetEventType() const override;
-}
+};
 
 }  // namespace mysql_ripple
 
