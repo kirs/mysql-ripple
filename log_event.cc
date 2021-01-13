@@ -121,7 +121,8 @@ std::string RawLogEventData::ToInfoString() const {
     case constants::ET_GTID_MYSQL:
       return ParseToInfoString<GTIDMySQLEvent>(*this);
     case constants::ET_TABLE_MAP:
-      return ParseToInfoString<TableMapEvent>(*this);
+      // return ParseToInfoString<TableMapEvent>(*this);
+      return "some<TableMapEvent>";
   }
   return "";
 }
