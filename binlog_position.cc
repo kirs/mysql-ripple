@@ -47,11 +47,18 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
   }
 }
 
+void printHex(const uint8_t *buffer, int len) {
+    for(size_t i = 0; i < len; ++i)
+    fprintf(stdout, "%02X%s", buffer[i],
+             ( i + 1 ) % 16 == 0 ? "\r\n" : " " );
+}
+
 void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // TODO: branch on type_code
 
   uint64_t table_id = byte_order::load6(buffer);
 
+  printHex(buffer, len);
 
 
   // buffer + 6 = flags
@@ -62,6 +69,8 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
 
   // lenenc number of columns
   uint8_t col_num = byte_order::load1(buffer + 6 + 2 + 2 + extra_len);
+
+  // skip (num of columns+7)/8
 
   LOG(INFO) << "ROWS_EVENT; " << "table_id=" << std::to_string(table_id) << " columns=" << std::to_string(col_num);
 }
