@@ -268,8 +268,6 @@ std::string BinlogPosition::ToString() const {
   return tmp;
 }
 
-}  // namespace mysql_ripple
-
 void parseTableMapEvent(const uint8_t *buffer, int len) {
   // the format descriptor event consists of some fixed size parts
   // and then a variable section and finally the checksum TRUE/FALSE in the end.
@@ -310,3 +308,5 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
   // checksum = byte_order::load1(buffer + len - 1);
   // return true;
 }
+
+}  // namespace mysql_ripple

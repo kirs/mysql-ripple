@@ -22,6 +22,7 @@
 #include "file_position.h"
 #include "gtid.h"
 #include "log_event.h"
+#include "byte_order.h"
 
 namespace mysql_ripple {
 
