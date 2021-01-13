@@ -73,17 +73,19 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
 
   uint64_t table_id = byte_order::load6(buffer);
 
-  printHex(buffer, len);
-
+  if(len < 120) {
+    printHex(buffer, len);
+  }
 
   // buffer + 6 = flags
   // buffer + 6 + 2 = extra-data-length
 
   uint16_t extra_len = byte_order::load2(buffer + 6 + 2);
-  LOG(INFO) << "ROWS_EVENT; extra_len=" << std::to_string(extra_len) << " byte1: " << buffer + 6 + 2 << " byte2: " << buffer + 6 + 2 + 1;
+  LOG(INFO) << "ROWS_EVENT; extra_len=" << std::to_string(extra_len) << " byte1: " << std::to_string((uint8_t*)(buffer + 6 + 2)) << " byte2: " << std::to_string((uint8_t*)(buffer + 6 + 2 + 1));
 
   // lenenc number of columns
-  uint8_t col_num = byte_order::load1(buffer + 6 + 2 + 2 + extra_len);
+  // why 11?
+  uint8_t col_num = byte_order::load1(buffer + 11);
 
   // skip (num of columns+7)/8
 
