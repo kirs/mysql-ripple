@@ -263,6 +263,10 @@ struct TableMapEvent : public EventBase {
   std::string table_name;
 
   int GetEventType() const override;
+
+  std::string ToInfoString() const;
+  bool ParseFromBuffer(const uint8_t *ptr, int len) override;
+  // bool SerializeToBuffer(uint8_t *buffer, int len) const override;
 };
 
 }  // namespace mysql_ripple

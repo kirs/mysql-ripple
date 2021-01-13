@@ -558,6 +558,11 @@ int TableMapEvent::GetEventType() const {
 //     event_type_header_lengths.size() + 1;
 // }
 
+// bool TableMapEvent::SerializeToBuffer(uint8_t *buffer, int len) const {
+//   // not implemented
+//   return false;
+// }
+
 bool TableMapEvent::ParseFromBuffer(const uint8_t *buffer, int len) {
   // the format descriptor event consists of some fixed size parts
   // and then a variable section and finally the checksum TRUE/FALSE in the end.
