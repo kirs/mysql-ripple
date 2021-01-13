@@ -21,6 +21,47 @@
 
 namespace mysql_ripple {
 
+void parseTableMapEvent(const uint8_t *buffer, int len) {
+  // the format descriptor event consists of some fixed size parts
+  // and then a variable section and finally the checksum TRUE/FALSE in the end.
+  // we don't (currently) care about the variable section.
+  // const int fixed_len = 2 + kServerVersionStringLen + 4 + 1;
+  // if (len < fixed_len) {
+  //   return false;
+  // }
+  uint64_t table_id;
+  std::string schema_name;
+  std::string table_name;
+
+
+  table_id = byte_order::load6(buffer);
+
+  uint8_t schema_name_len = byte_order::load1(buffer + 8);
+  schema_name.assign(reinterpret_cast<const char*>(buffer + 8), schema_name_len);
+
+  uint8_t table_name_len = byte_order::load1(buffer + 8 + schema_name_len);
+  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + schema_name_len), table_name_len);
+
+  LOG(INFO) << "schema_name: " << schema_name
+            << " table name: " << table_name
+            << ", table_id: " << std::to_string(table_id);
+
+  // TODO: printf!
+
+  // const char *ptr = reinterpret_cast<const char*>(buffer + 2);
+  // size_t version_len = strnlen(ptr, kServerVersionStringLen);
+  // server_version = std::string(ptr, version_len);
+  // create_timestamp = byte_order::load4(buffer + kServerVersionStringLen + 2);
+  // event_header_length = byte_order::load1(buffer + kServerVersionStringLen +
+  //                                         2 + 4);
+  // for (uint offset = kServerVersionStringLen + 2 + 4 + 1; offset < len - 1;
+  //      offset++) {
+  //   event_type_header_lengths.push_back(byte_order::load1(buffer + offset));
+  // }
+  // checksum = byte_order::load1(buffer + len - 1);
+  // return true;
+}
+
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
   next_master_position.offset = event.header.nextpos;
   latest_master_position = next_master_position;
@@ -266,47 +307,6 @@ std::string BinlogPosition::ToString() const {
   tmp += next_master_position.ToString();
   tmp += " ]";
   return tmp;
-}
-
-void parseTableMapEvent(const uint8_t *buffer, int len) {
-  // the format descriptor event consists of some fixed size parts
-  // and then a variable section and finally the checksum TRUE/FALSE in the end.
-  // we don't (currently) care about the variable section.
-  // const int fixed_len = 2 + kServerVersionStringLen + 4 + 1;
-  // if (len < fixed_len) {
-  //   return false;
-  // }
-  uint64_t table_id;
-  std::string schema_name;
-  std::string table_name;
-
-
-  table_id = byte_order::load6(buffer);
-
-  uint8_t schema_name_len = byte_order::load1(buffer + 8);
-  schema_name.assign(reinterpret_cast<const char*>(buffer + 8), schema_name_len);
-
-  uint8_t table_name_len = byte_order::load1(buffer + 8 + schema_name_len);
-  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + schema_name_len), table_name_len);
-
-  LOG(INFO) << "schema_name: " << schema_name
-            << " table name: " << table_name
-            << ", table_id: " << std::to_string(table_id);
-
-  // TODO: printf!
-
-  // const char *ptr = reinterpret_cast<const char*>(buffer + 2);
-  // size_t version_len = strnlen(ptr, kServerVersionStringLen);
-  // server_version = std::string(ptr, version_len);
-  // create_timestamp = byte_order::load4(buffer + kServerVersionStringLen + 2);
-  // event_header_length = byte_order::load1(buffer + kServerVersionStringLen +
-  //                                         2 + 4);
-  // for (uint offset = kServerVersionStringLen + 2 + 4 + 1; offset < len - 1;
-  //      offset++) {
-  //   event_type_header_lengths.push_back(byte_order::load1(buffer + offset));
-  // }
-  // checksum = byte_order::load1(buffer + len - 1);
-  // return true;
 }
 
 }  // namespace mysql_ripple
