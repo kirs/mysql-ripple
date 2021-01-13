@@ -22,25 +22,25 @@
 namespace mysql_ripple {
 
 void parseTableMapEvent(const uint8_t *buffer, int len) {
-  // the format descriptor event consists of some fixed size parts
-  // and then a variable section and finally the checksum TRUE/FALSE in the end.
-  // we don't (currently) care about the variable section.
-  // const int fixed_len = 2 + kServerVersionStringLen + 4 + 1;
-  // if (len < fixed_len) {
-  //   return false;
-  // }
+  // https://dev.mysql.com/doc/internals/en/table-map-event.html
+
   uint64_t table_id;
   std::string schema_name;
   std::string table_name;
 
-
   table_id = byte_order::load6(buffer);
+
+  // 1              schema name length
+  // string         schema name
+  // 1              [00]
+  // 1              table name length
+  // string         table name
 
   uint8_t schema_name_len = byte_order::load1(buffer + 8);
   schema_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1), schema_name_len);
 
-  uint8_t table_name_len = byte_order::load1(buffer + 8 + 1 + schema_name_len);
-  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1 + schema_name_len + 1), table_name_len);
+  uint8_t table_name_len = byte_order::load1(buffer + 8 + 1 + schema_name_len + 1);
+  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1 + schema_name_len + 2), table_name_len);
 
   LOG(INFO) << "schema_name: " << schema_name
             << " table name: " << table_name
