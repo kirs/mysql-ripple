@@ -81,8 +81,7 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // buffer + 6 + 2 = extra-data-length
 
   uint16_t extra_len = byte_order::load2(buffer + 6 + 2);
-  LOG(INFO) << "ROWS_EVENT; extra_len=" << std::to_string(extra_len);
-  fprintf(stdout, "len byte1: %d, len byte2: %d\n", buffer + 6 + 2, buffer + 6 + 2 + 1);
+  LOG(INFO) << "ROWS_EVENT; extra_len=" << std::to_string(extra_len) << " len byte1: " << std::to_string(buffer[6 + 2]) << " len byte2: " << buffer[6 + 2 + 1];
 
   // lenenc number of columns
   // why 11?

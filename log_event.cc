@@ -458,7 +458,7 @@ bool QueryEvent::ParseFromBuffer(const uint8_t *buffer, int len) {
   // query text is stored in the rest
   query.assign(reinterpret_cast<const char*>(buffer), end - buffer);
 
-  LOG(INFO) << "QUERY_EVENT; query: " << query;
+  // LOG(INFO) << "QUERY_EVENT; query: " << query;
   return true;
 }
 
