@@ -56,6 +56,7 @@ enum EventType {
   ET_BEGIN_LOAD_QUERY = 17,
   ET_EXECUTE_LOAD_QUERY = 18,
   ET_TABLE_MAP = 19,
+  ET_WRITE_ROWS_V2 = 30,
 };
 
 std::string ToString(EventType);

@@ -46,6 +46,10 @@ std::string ToString(EventType type) {
       return "Binlog_checkpoint";
     case ET_START_ENCRYPTION:
       return "Start_encryption";
+    case ET_WRITE_ROWS_V2:
+      return "WRITE_ROWS_EVENTv2";
+    case ET_TABLE_MAP:
+      return "TABLE_MAP_EVENT";
     default:
       break;
   }
