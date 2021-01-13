@@ -37,10 +37,10 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
   table_id = byte_order::load6(buffer);
 
   uint8_t schema_name_len = byte_order::load1(buffer + 8);
-  schema_name.assign(reinterpret_cast<const char*>(buffer + 8), schema_name_len);
+  schema_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1), schema_name_len);
 
-  uint8_t table_name_len = byte_order::load1(buffer + 8 + schema_name_len);
-  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + schema_name_len), table_name_len);
+  uint8_t table_name_len = byte_order::load1(buffer + 8 + 1 + schema_name_len);
+  table_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1 + schema_name_len + 1), table_name_len);
 
   LOG(INFO) << "schema_name: " << schema_name
             << " table name: " << table_name
@@ -215,7 +215,7 @@ int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
       //   return -1;
       // }
       // group_state = END_OF_GROUP;
-      // break;
+      break;
     }
     case constants::ET_QUERY: {
       QueryEvent ev;
