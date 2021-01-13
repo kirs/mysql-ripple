@@ -87,14 +87,8 @@ CHANGE MASTER TO MASTER_HOST='127.0.0.1', MASTER_USER='root', MASTER_PORT=51005,
 mysql -h 127.0.0.1 -P 3307 -u root -e "create database shopiglobo"
 mysqldump -h 127.0.0.1 -P 3306 -u root shopiglobo | mysql -h 127.0.0.1 -P 3307 -u root shopiglobo
 
-./mysql-ripple/bazel-bin/rippled -ripple_master_address 127.0.0.1 -ripple_master_port 3306
+./mysql-ripple/bazel-bin/rippled -ripple_master_address 127.0.0.1 -ripple_master_port 3306 -ripple_server_address 127.0.0.1
 
 1. SHOW MASTER STATUS, see position
 2. start slave with the dump
 3. CHANGE MASTER TO ...
-
-ripple is working!
-things to hack on:
-
-- what's up with MASTER_LOG_POS? can I omit it?
-- try to log actual events

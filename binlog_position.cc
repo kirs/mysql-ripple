@@ -42,9 +42,11 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
   uint8_t table_name_len = byte_order::load1(buffer + 8 + 1 + schema_name_len + 1);
   table_name.assign(reinterpret_cast<const char*>(buffer + 8 + 1 + schema_name_len + 2), table_name_len);
 
-  LOG(INFO) << "schema_name: " << schema_name
-            << " table name: " << table_name
-            << ", table_id: " << std::to_string(table_id);
+  if(schema_name.compare("mysql") != 0) {
+    LOG(INFO) << "TABLE_MAP_EVENT; " << schema_name << "." << table_name
+            << " table_id=" << std::to_string(table_id);
+  }
+
 
   // TODO: printf!
 
