@@ -92,7 +92,7 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // col num is length encoded int, but we are operating with small (< 255) column count, so it's fine to read it as it is
   uint8_t col_num = byte_order::load8(buffer + 6 + 2 + 2);
 
-  if col_num > 0 {
+  if(col_num > 0) {
     // assuming PK is bigint and the first column
     uint64_t pk = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
 
