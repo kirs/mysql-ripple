@@ -27,7 +27,7 @@
 namespace mysql_ripple {
 
 // captured from TABLE_MAP_EVENT
-static const uint64_t ORDERS_TABLE_ID = 108;
+static const uint64_t ORDERS_TABLE_ID = 114;
 
 struct RowsEvent {
   uint64_t table_id;
