@@ -51,6 +51,8 @@ void printHex(const uint8_t *buffer, int len) {
     for(size_t i = 0; i < len; ++i)
     fprintf(stdout, "0x%02X%s", buffer[i],
              ( i + 1 ) % 16 == 0 ? "\r\n" : " " );
+
+    fprintf(stdout, "\n");
 }
 
 // 00 00 01 00 00 00
@@ -75,12 +77,9 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
 
   // TABLE_MAP_EVENT; shopiglobo.orders table_id=108
 
-  if(len < 120) {
-    printHex(buffer, len);
-  }
-
-  // buffer + 6 = flags
-  // buffer + 6 + 2 = extra-data-length
+  // if(len < 120) {
+  //   printHex(buffer, len);
+  // }
 
   if(len < 120) {
     for(int i = 0; i < len; i++) {
@@ -88,20 +87,26 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
     }
   }
 
+  uint16_t flags = byte_order::load2(buffer + 6);
+  // 0x0001 means end of stmt
+
+  // buffer + 6 = flags
+  // buffer + 6 + 2 = extra-data-length
+
+
   uint16_t extra_len = byte_order::load2(buffer + 8);
   // LOG(INFO) << "ROWS_EVENT; buffer_len: " << std::to_string(len) << " extra_len=" << std::to_string(extra_len) << " len byte1: " << std::to_string((uint8_t)buffer[8]) << " len byte2: " << std::to_string((uint8_t)buffer[9]);
 
   fprintf(stdout, "ROWS_EVENT; buffer_len: %d, extra_len: %d\n", len, extra_len);
 
-  // lenenc number of columns
-  // why 11?
-  uint8_t col_num = byte_order::load1(buffer + 11);
+  // buffer + 8 + extra_len = lenenc number of columns
+  uint8_t col_num = byte_order::load8(buffer + 8 + extra_len + 1);
 
   // skip (num of columns+7)/8
 
   // LOG(INFO) << "ROWS_EVENT; " << "table_id=" << std::to_string(table_id) << " columns=" << std::to_string(col_num);
 
-  fprintf(stdout, "ROWS_EVENT; table_id=%d, columns=%d\n", table_id, col_num);
+  fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d\n", table_id, flags, col_num);
 }
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
