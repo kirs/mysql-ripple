@@ -81,32 +81,26 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   //   printHex(buffer, len);
   // }
 
-  if(len < 120) {
-    for(int i = 0; i < len; i++) {
-      fprintf(stdout, "ROWS_EVENT - debug buf[%d] : 0x%02X\n", i, buffer[i]);
-    }
-  }
+  // if(len < 120) {
+  //   for(int i = 0; i < len; i++) {
+  //     fprintf(stdout, "ROWS_EVENT - debug buf[%d] : 0x%02X\n", i, buffer[i]);
+  //   }
+  // }
 
   uint16_t flags = byte_order::load2(buffer + 6);
-  // 0x0001 means end of stmt
 
-  // buffer + 6 = flags
-  // buffer + 6 + 2 = extra-data-length
+  // col num is length encoded int, but we are operating with small (< 255) column count, so it's fine to read it as it is
+  uint8_t col_num = byte_order::load8(buffer + 6 + 2 + 2);
 
+  if col_num > 0 {
+    // assuming PK is bigint and the first column
+    uint64_t pk = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
 
-  uint16_t extra_len = byte_order::load2(buffer + 8);
-  // LOG(INFO) << "ROWS_EVENT; buffer_len: " << std::to_string(len) << " extra_len=" << std::to_string(extra_len) << " len byte1: " << std::to_string((uint8_t)buffer[8]) << " len byte2: " << std::to_string((uint8_t)buffer[9]);
+    // assuming shop_id is bigint and the first column
+    uint64_t shop_id = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
 
-  fprintf(stdout, "ROWS_EVENT; buffer_len: %d, extra_len: %d\n", len, extra_len);
-
-  // buffer + 8 + extra_len = lenenc number of columns
-  uint8_t col_num = byte_order::load8(buffer + 8 + extra_len + 1);
-
-  // skip (num of columns+7)/8
-
-  // LOG(INFO) << "ROWS_EVENT; " << "table_id=" << std::to_string(table_id) << " columns=" << std::to_string(col_num);
-
-  fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d\n", table_id, flags, col_num);
+    fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d, pk=%d shop_id=%d\n", table_id, flags, col_num, ok, shop_id);
+  }
 }
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
