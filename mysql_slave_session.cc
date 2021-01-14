@@ -780,14 +780,12 @@ bool SlaveSession::SendEvents() {
       if(ev.ParseFromRawLogEventData(event)) {
         fprintf(stdout, "-- slave session parsed ok\n");
         if(ev.shop_id == 42) {
-          // not replicating shop id 42
+          fprintf(stdout, "-- not replicating event for shop_id = 42\n");
           continue;
         }
       } else {
         fprintf(stdout, "-- slave session parsed NOT OK\n");
       }
-
-      continue;
     }
 
     FilePosition event_pos =
