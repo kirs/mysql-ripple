@@ -99,7 +99,7 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
     // assuming shop_id is bigint and the first column
     uint64_t shop_id = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
 
-    fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d, pk=%d shop_id=%d\n", table_id, flags, col_num, ok, shop_id);
+    fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d, pk=%d shop_id=%d\n", table_id, flags, col_num, pk, shop_id);
   }
 }
 
