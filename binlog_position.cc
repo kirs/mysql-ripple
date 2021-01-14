@@ -82,8 +82,16 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // buffer + 6 = flags
   // buffer + 6 + 2 = extra-data-length
 
+  if(len < 120) {
+    for(int i = 0; i < len; i++) {
+      fprintf(stdout, "%d : 0x%02X\n", i, buffer[i]);
+    }
+  }
+
   uint16_t extra_len = byte_order::load2(buffer + 8);
-  LOG(INFO) << "ROWS_EVENT; buffer_len: " << std::to_string(len) << " extra_len=" << std::to_string(extra_len) << " len byte1: " << std::to_string((uint8_t)buffer[8]) << " len byte2: " << std::to_string((uint8_t)buffer[9]);
+  // LOG(INFO) << "ROWS_EVENT; buffer_len: " << std::to_string(len) << " extra_len=" << std::to_string(extra_len) << " len byte1: " << std::to_string((uint8_t)buffer[8]) << " len byte2: " << std::to_string((uint8_t)buffer[9]);
+
+  fprintf(stdout, "ROWS_EVENT; buffer_len: %d, extra_len: %d", len, extra_len);
 
   // lenenc number of columns
   // why 11?
@@ -91,7 +99,9 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
 
   // skip (num of columns+7)/8
 
-  LOG(INFO) << "ROWS_EVENT; " << "table_id=" << std::to_string(table_id) << " columns=" << std::to_string(col_num);
+  // LOG(INFO) << "ROWS_EVENT; " << "table_id=" << std::to_string(table_id) << " columns=" << std::to_string(col_num);
+
+  fprintf(stdout, "ROWS_EVENT; table_id=%d, columns=%d", table_id, col_num);
 }
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
