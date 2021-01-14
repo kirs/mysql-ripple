@@ -46,11 +46,14 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
   }
 }
 
+bool RowsEvent::ShouldReplicate() {
+  return (table_id == ORDERS_TABLE_ID && shop_id == 42)
+}
+
 bool RowsEvent::ParseFromRawLogEventData(const RawLogEventData& event) {
   const uint8_t *buffer = event.event_data;
 
-  uint64_t table_id = byte_order::load6(buffer);
-  if(table_id != ORDERS_TABLE_ID) return false;
+  table_id = byte_order::load6(buffer);
 
   uint16_t flags = byte_order::load2(buffer + 6);
 
@@ -58,17 +61,19 @@ bool RowsEvent::ParseFromRawLogEventData(const RawLogEventData& event) {
   // [1]: https://dev.mysql.com/doc/internals/en/describing-packets.html#type-lenenc_int
   uint8_t col_num = byte_order::load8(buffer + 6 + 2 + 2);
 
-  if(col_num > 0) {
+  if(table_id == ORDERS_TABLE_ID) {
     // assuming promary key is bigint and is the first column
     pk = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
     // assuming shop_id is bigint and is the 2nd column
     shop_id = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2 + 8);
 
     fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d, pk=%d shop_id=%d\n", table_id, flags, col_num, pk, shop_id);
-    return true;
+  } else {
+    pk = 0;
+    shop_id = 0;
   }
 
-  return false;
+  return true;
 }
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {

@@ -778,9 +778,8 @@ bool SlaveSession::SendEvents() {
     if (event.header.type == constants::ET_WRITE_ROWS_V2) {
       RowsEvent ev;
       if(ev.ParseFromRawLogEventData(event)) {
-        fprintf(stdout, "-- slave session parsed ok\n");
-        if(ev.shop_id == 42) {
-          fprintf(stdout, "-- not replicating event for shop_id = 42\n");
+        if(!ev.ShouldReplicate()) {
+          fprintf(stdout, "-- ShouldReplicate() = false; not replicating event\n");
           continue;
         }
       } else {
