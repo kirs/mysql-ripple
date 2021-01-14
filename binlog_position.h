@@ -34,7 +34,7 @@ struct RowsEvent {
   uint64_t pk;
   uint64_t shop_id;
 
-  bool ParseFromRawLogEventData(const RawLogEventData& event)
+  bool ParseFromRawLogEventData(const RawLogEventData& event);
 }
 
 // This class represents a complete binlog position.
