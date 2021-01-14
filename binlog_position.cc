@@ -47,7 +47,7 @@ void parseTableMapEvent(const uint8_t *buffer, int len) {
 }
 
 bool RowsEvent::ShouldReplicate() {
-  return (table_id == ORDERS_TABLE_ID && shop_id == 42)
+  return (table_id == ORDERS_TABLE_ID && shop_id == 42);
 }
 
 bool RowsEvent::ParseFromRawLogEventData(const RawLogEventData& event) {
