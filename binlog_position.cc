@@ -55,37 +55,14 @@ void printHex(const uint8_t *buffer, int len) {
     fprintf(stdout, "\n");
 }
 
-// 00 00 01 00 00 00
-// 6F 00
-// 00 00 00 00 01 00 02 00 05 FF E0 1B 07 00
-// 00 00 00 00 00 10 0E 00 00 01 04 57 45 53 54 E0
-// 1B 07 00 00 01 00 00 00 00 00 00 00 00 03 57 45
-// I0113 20:16:38.843719  6927 binlog_position.cc:68] ROWS_EVENT; extra_len=2
-// I0113 20:16:38.843729  6927 binlog_position.cc:75] ROWS_EVENT; table_id=111 columns=224
+bool RowsEvent::ParseFromRawLogEventData(const RawLogEventData& event) {
+  const uint8_t *buffer = event.event_data;
+  // event.event_data, event.event_data_length
 
-// 00 00 00 00 00 6D
-// 00 00 //flags
-// 00 00 // extra-data-length
-// 00 01 00 02 00 02 FF FE 0B 00 00
-// I0113 20:16:38.844470  6927 binlog_position.cc:68] ROWS_EVENT; extra_len=2
-// I0113 20:16:38.844476  6927 binlog_position.cc:75] ROWS_EVENT; table_id=109 columns=254
-
-void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
   // TODO: branch on type_code
 
   uint64_t table_id = byte_order::load6(buffer);
-
-  // TABLE_MAP_EVENT; shopiglobo.orders table_id=108
-
-  // if(len < 120) {
-  //   printHex(buffer, len);
-  // }
-
-  // if(len < 120) {
-  //   for(int i = 0; i < len; i++) {
-  //     fprintf(stdout, "ROWS_EVENT - debug buf[%d] : 0x%02X\n", i, buffer[i]);
-  //   }
-  // }
+  if(table_id != ORDERS_TABLE_ID) return false;
 
   uint16_t flags = byte_order::load2(buffer + 6);
 
@@ -94,13 +71,16 @@ void parseRowsEvent(uint8_t type_code, const uint8_t *buffer, int len) {
 
   if(col_num > 0) {
     // assuming PK is bigint and the first column
-    uint64_t pk = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
+    pk = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
 
     // assuming shop_id is bigint and the first column
-    uint64_t shop_id = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2);
+    shop_id = byte_order::load8(buffer + 6 + 2 + 2 + 1 + 2 + 8);
 
     fprintf(stdout, "ROWS_EVENT; table_id=%d, flags=%d, columns=%d, pk=%d shop_id=%d\n", table_id, flags, col_num, pk, shop_id);
+    return true;
   }
+
+  return false;
 }
 
 int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
@@ -252,7 +232,8 @@ int BinlogPosition::Update(RawLogEventData event, off_t end_offset) {
     }
     // TODO: need to handle UPDATE_ROWS and DELETE_ROWS as well
     case constants::ET_WRITE_ROWS_V2: {
-      parseRowsEvent(constants::ET_WRITE_ROWS_V2, event.event_data, event.event_data_length);
+      RowsEvent ev;
+      ev.ParseFromRawLogEventData(event);
       break;
     }
     case constants::ET_QUERY: {

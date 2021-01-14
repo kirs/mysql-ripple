@@ -26,6 +26,17 @@
 
 namespace mysql_ripple {
 
+// captured from TABLE_MAP_EVENT
+static const uint64_t ORDERS_TABLE_ID = 108;
+
+struct RowsEvent {
+  uint64_t table_id;
+  uint64_t pk;
+  uint64_t shop_id;
+
+  bool ParseFromRawLogEventData(const RawLogEventData& event)
+}
+
 // This class represents a complete binlog position.
 struct BinlogPosition {
   BinlogPosition() : group_state(NO_GROUP) {}

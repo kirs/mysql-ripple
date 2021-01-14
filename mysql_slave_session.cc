@@ -775,6 +775,21 @@ bool SlaveSession::SendEvents() {
       continue;
     }
 
+    if (event.header.type == constants::ET_WRITE_ROWS_V2) {
+      RowsEvent ev;
+      if(ev.ParseFromRawLogEventData(event)) {
+        fprintf(stdout, "-- slave session parsed ok\n");
+        if(ev.shop_id == 42) {
+          // not replicating shop id 42
+          continue;
+        }
+      } else {
+        fprintf(stdout, "-- slave session parsed NOT OK\n");
+      }
+
+      continue;
+    }
+
     FilePosition event_pos =
         binlog_reader_.GetBinlogPosition().latest_event_start_position;
 
